@@ -1,0 +1,8 @@
+com\musicapp\database\DatabaseConnector.class
+com\musicapp\service\MoodClassifier$Mood.class
+com\musicapp\service\MoodClassifier.class
+com\musicapp\database\DatabaseConnector$Playlist.class
+com\musicapp\service\SpotifyService$AudioFeaturesData.class
+com\musicapp\service\SpotifyService.class
+com\musicapp\service\SpotifyService$TrackInfo.class
+com\musicapp\Main.class
