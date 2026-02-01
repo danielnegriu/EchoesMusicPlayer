@@ -77,7 +77,7 @@ public class DatabaseConnector {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
-            pstmt.setString(2, password); // In production, hash this!
+            pstmt.setString(2, password); // În producție, hasează aceasta!
             pstmt.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -222,7 +222,7 @@ public class DatabaseConnector {
     }
     
     public static void addSongToPlaylist(int playlistId, String songPath) {
-        // Get the next position
+        // Obține următoarea poziție
         String getMaxPos = "SELECT COALESCE(MAX(position), -1) + 1 as next_pos FROM playlist_songs WHERE playlist_id = ?";
         String insertSong = "INSERT INTO playlist_songs(playlist_id, song_path, position) VALUES(?, ?, ?)";
         
@@ -278,7 +278,7 @@ public class DatabaseConnector {
         return songs;
     }
     
-    // Inner class for Playlist
+    // Clasă internă pentru Playlist
     public static class Playlist {
         private int id;
         private String name;

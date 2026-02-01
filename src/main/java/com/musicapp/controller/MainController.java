@@ -51,11 +51,11 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        // Initialize Spotify service
+        // Inițializează serviciul Spotify
         spotifyService = new SpotifyService();
         spotifyService.authenticate();
         
-        // Setup progress slider listener for seeking
+        // Configurează listener-ul slider-ului de progres pentru derulare
         progressSlider.setOnMousePressed(event -> {
             if (mediaPlayer != null) {
                 mediaPlayer.seek(Duration.seconds(progressSlider.getValue()));
@@ -68,10 +68,10 @@ public class MainController {
             }
         });
         
-        // Set default album artwork
+        // Setează imaginea implicită a albumului
         setDefaultAlbumArt();
         
-        // Add playlist selection listener
+        // Adaugă listener pentru selecția playlistului
         playlistListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 loadPlaylistSongs(newVal);
@@ -84,13 +84,13 @@ public class MainController {
         this.currentUsername = username;
         this.usernameLabel.setText("Welcome, " + username + "!");
         
-        // Load user's saved songs
+        // Încarcă melodiile salvate ale utilizatorului
         List<String> savedSongPaths = DatabaseConnector.getSongsForUser(userId);
         for (String path : savedSongPaths) {
             songListView.getItems().add(createSongFromPath(path));
         }
         
-        // Load user's playlists
+        // Încarcă playlisturile utilizatorului
         loadPlaylists();
     }
 
@@ -106,7 +106,7 @@ public class MainController {
             for(File file : files){
                 String songPath = file.getAbsolutePath();
                 DatabaseConnector.addSongForUser(currentUserId, songPath);
-                // Only add to view if we're in "All Songs" mode
+                // Adaugă la vizualizare doar dacă suntem în modul "Toate melodiile"
                 if (currentPlaylist == null) {
                     songListView.getItems().add(createSongFromPath(songPath));
                 }
@@ -117,12 +117,12 @@ public class MainController {
     @FXML
     private void onPlayClick(){
         if (isPaused && mediaPlayer != null) {
-            // Resume playback
+            // Reia redarea
             mediaPlayer.play();
             isPaused = false;
             currentSongLabel.setText("Playing: " + currentSong.getName());
         } else {
-            // Play selected song
+            // Redă melodia selectată
             Song selected = songListView.getSelectionModel().getSelectedItem();
             if(selected != null){
                 playSong(new File(selected.getPath()));
@@ -140,7 +140,7 @@ public class MainController {
         Media media = new Media(file.toURI().toString());
         mediaPlayer = new MediaPlayer(media);
         
-        // Setup progress bar update
+        // Configurează actualizarea barei de progres
         mediaPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) -> {
             if (!progressSlider.isValueChanging()) {
                 progressSlider.setValue(newTime.toSeconds());
@@ -148,7 +148,7 @@ public class MainController {
             currentTimeLabel.setText(formatTime(newTime));
         });
         
-        // Set total duration when ready
+        // Setează durata totală când este gata
         mediaPlayer.setOnReady(() -> {
             Duration total = mediaPlayer.getTotalDuration();
             progressSlider.setMax(total.toSeconds());
@@ -157,7 +157,7 @@ public class MainController {
         
         mediaPlayer.play();
         
-        // metadate spotify
+        // Metadate Spotify
         new Thread(() -> {
             SpotifyService.TrackInfo trackInfo = spotifyService.searchTrack(file.getName());
             Platform.runLater(() -> {
@@ -165,7 +165,7 @@ public class MainController {
                     currentSongLabel.setText("Playing: " + trackInfo.getTitle());
                     artistLabel.setText(trackInfo.getArtist());
                     
-                    // incarca coverul albumului
+                    // Încarcă coperta albumului
                     if (trackInfo.getAlbumArtUrl() != null) {
                         try {
                             Image albumArt = new Image(trackInfo.getAlbumArtUrl(), true);
@@ -218,7 +218,7 @@ public class MainController {
         int currentIndex = songListView.getSelectionModel().getSelectedIndex();
         int nextIndex;
         
-        // If no song is selected or at the last song, go to first song
+        // Dacă nicio melodie nu este selectată sau suntem la ultima melodie, mergi la prima melodie
         if (currentIndex == -1 || currentIndex >= songListView.getItems().size() - 1) {
             nextIndex = 0;
         } else {
@@ -239,7 +239,7 @@ public class MainController {
         int currentIndex = songListView.getSelectionModel().getSelectedIndex();
         int previousIndex;
         
-        // If no song is selected or at the first song, go to last song
+        // Dacă nicio melodie nu este selectată sau suntem la prima melodie, mergi la ultima melodie
         if (currentIndex <= 0) {
             previousIndex = songListView.getItems().size() - 1;
         } else {
@@ -258,17 +258,17 @@ public class MainController {
     }
     
     private void setDefaultAlbumArt() {
-        // Create a placeholder image (you can replace this with an actual default image)
+        // Creează o imagine placeholder (poți înlocui aceasta cu o imagine implicită reală)
         albumArtworkView.setImage(null);
     }
     
     private Song createSongFromPath(String path) {
-        // Extract info from filename - don't call Spotify during load (too slow)
+        // Extrage informații din numele fișierului - nu apela Spotify la încărcare (prea lent)
         String fileName = extractFileName(path);
         String title = fileName;
         String artist = "Unknown Artist";
         
-        // Try to parse "Artist - Title" format from filename
+        // Încearcă să parsezi formatul "Artist - Titlu" din numele fișierului
         if (path.contains(" - ")) {
             String baseName = path.substring(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1);
             baseName = baseName.replaceAll("\\.(mp3|wav|ogg)$", "");
@@ -335,7 +335,7 @@ public class MainController {
                 if (response == ButtonType.OK) {
                     DatabaseConnector.deletePlaylist(selected.getId());
                     loadPlaylists();
-                    // Reset to all songs view
+                    // Resetează la vizualizarea tuturor melodiilor
                     currentPlaylist = null;
                     currentPlaylistLabel.setText("All Songs");
                     songListView.getItems().clear();
@@ -369,7 +369,7 @@ public class MainController {
         
         dialog.showAndWait().ifPresent(playlist -> {
             DatabaseConnector.addSongToPlaylist(playlist.getId(), selectedSong.getPath());
-            // Refresh if we're viewing this playlist
+            // Reîmprospătează dacă vizualizăm acest playlist
             if (currentPlaylist != null && currentPlaylist.getId() == playlist.getId()) {
                 loadPlaylistSongs(currentPlaylist);
             }
@@ -411,25 +411,25 @@ public class MainController {
             return;
         }
         
-        // Show progress dialog
+        // Afișează dialogul de progres
         Alert progressAlert = new Alert(Alert.AlertType.INFORMATION);
         progressAlert.setTitle("Analyzing Songs");
         progressAlert.setHeaderText("Fetching audio features from Spotify...");
         progressAlert.setContentText("This may take a moment. Please wait.");
         progressAlert.show();
         
-        // Analyze songs in background thread
+        // Analizează melodiile într-un fir de execuție în fundal
         new Thread(() -> {
             try {
-                // Re-authenticate to get a fresh token
+                // Re-autentifică pentru a obține un token proaspăt
                 spotifyService.authenticate();
                 
                 List<SpotifyService.AudioFeaturesData> audioFeaturesList = new ArrayList<>();
                 
-                // Fetch audio features for each song - now always returns a value
+                // Obține caracteristicile audio pentru fiecare melodie - acum returnează întotdeauna o valoare
                 for (String songPath : allSongs) {
                     SpotifyService.AudioFeaturesData features = spotifyService.getAudioFeatures(songPath);
-                    audioFeaturesList.add(features); // No null check needed
+                    audioFeaturesList.add(features); // Nu este nevoie de verificare null
                 }
                 
                 if (audioFeaturesList.isEmpty()) {
@@ -442,13 +442,13 @@ public class MainController {
                 
                 System.out.println("Starting mood classification with " + audioFeaturesList.size() + " songs...");
                 
-                // Show clustering progress on UI thread
+                // Afișează progresul clustering-ului pe firul UI
                 Platform.runLater(() -> {
                     progressAlert.setHeaderText("Classifying songs by mood...");
                     progressAlert.setContentText("Using machine learning to analyze your music.");
                 });
                 
-                // Classify songs by mood using ML (keep in background thread!)
+                // Clasifică melodiile pe stări folosind ML (păstrează în firul de fundal!)
                 Map<MoodClassifier.Mood, List<String>> moodPlaylists = null;
                 try {
                     moodPlaylists = MoodClassifier.classifySongsByMood(audioFeaturesList);
@@ -465,11 +465,11 @@ public class MainController {
                 
                 final Map<MoodClassifier.Mood, List<String>> finalMoodPlaylists = moodPlaylists;
                 
-                // Now update UI with results
+                // Acum actualizează UI-ul cu rezultatele
                 Platform.runLater(() -> {
                     progressAlert.close();
                     
-                    // Create playlists in database
+                    // Creează playlisturi în baza de date
                     int playlistsCreated = 0;
                     StringBuilder summary = new StringBuilder("Created playlists:\n\n");
                     
@@ -489,7 +489,7 @@ public class MainController {
                         }
                     }
                     
-                    // Refresh playlists view
+                    // Reîmprospătează vizualizarea playlisturilor
                     loadPlaylists();
                     
                     if (playlistsCreated > 0) {

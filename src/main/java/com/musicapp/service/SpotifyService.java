@@ -88,7 +88,7 @@ public class SpotifyService {
     }
     
     public AudioFeaturesData getAudioFeatures(String songName) {
-        // Always return estimated features as fallback - never return null
+        // Returnează întotdeauna caracteristici estimate ca rezeră - nu returna niciodată null
         if (!isAuthenticated || spotifyApi == null) {
             System.out.println("Not authenticated, using estimated features for: " + songName);
             return generateEstimatedFeatures(songName);
@@ -129,10 +129,10 @@ public class SpotifyService {
                 return generateEstimatedFeatures(songName);
             }
         } catch (Exception e) {
-            // Check if it's a Forbidden error (expired token)
+            // Verifică dacă este o eroare Forbidden (token expirat)
             if (e.getMessage() != null && e.getMessage().contains("Forbidden")) {
                 System.out.println("Token expired, re-authenticating...");
-                authenticate(); // Try to re-authenticate
+                authenticate(); // Încearcă să re-autentifici
             }
             System.err.println("Error fetching audio features (" + e.getMessage() + "), using estimated features for: " + songName);
             return generateEstimatedFeatures(songName);
@@ -140,13 +140,13 @@ public class SpotifyService {
     }
     
     private AudioFeaturesData generateEstimatedFeatures(String songName) {
-        // Generate varied but plausible audio features based on song name hash
-        // This ensures consistent features for the same song across runs
+        // Generează caracteristici audio variate dar plauzibile bazate pe hash-ul numelui melodiei
+        // Aceasta asigură caracteristici consistente pentru aceeași melodie în cadrul rulărilor
         int hash = songName.hashCode();
         java.util.Random random = new java.util.Random(hash);
         
-        // Generate features with realistic distributions
-        float energy = 0.3f + random.nextFloat() * 0.7f; // 0.3 to 1.0
+        // Generează caracteristici cu distribuții realiste
+        float energy = 0.3f + random.nextFloat() * 0.7f; // 0.3 până la 1.0
         float valence = 0.2f + random.nextFloat() * 0.8f; // 0.2 to 1.0
         float danceability = 0.3f + random.nextFloat() * 0.6f; // 0.3 to 0.9
         float tempo = 80 + random.nextFloat() * 100; // 80 to 180 BPM

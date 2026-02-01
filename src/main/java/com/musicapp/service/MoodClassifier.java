@@ -10,10 +10,10 @@ import java.util.*;
 public class MoodClassifier {
     
     public enum Mood {
-        ENERGETIC("Energetic", "High energy, upbeat songs"),
-        CALM("Calm", "Relaxing, peaceful songs"),
-        HAPPY("Happy", "Cheerful, positive songs"),
-        MELANCHOLIC("Melancholic", "Sad, emotional songs");
+        ENERGETIC("Energetic", "Melodii cu energie ridicată, vesele"),
+        CALM("Calm", "Melodii relaxante, liniștitoare"),
+        HAPPY("Happy", "Melodii vesele, pozitive"),
+        MELANCHOLIC("Melancholic", "Melodii triste, emoționale");
         
         private final String displayName;
         private final String description;
@@ -41,7 +41,7 @@ public class MoodClassifier {
         
         try {
             System.out.println("MoodClassifier: Creating dataset...");
-            // Create dataset for clustering
+            // Creează setul de date pentru clustering
             ArrayList<Attribute> attributes = new ArrayList<>();
             attributes.add(new Attribute("energy"));
             attributes.add(new Attribute("valence"));
@@ -50,33 +50,33 @@ public class MoodClassifier {
             Instances dataset = new Instances("Songs", attributes, audioFeaturesList.size());
             
             System.out.println("MoodClassifier: Adding instances to dataset...");
-            // Add instances
+            // Adaugă instanțe
             for (SpotifyService.AudioFeaturesData features : audioFeaturesList) {
                 Instance instance = new DenseInstance(3);
                 instance.setValue(0, features.getEnergy());
                 instance.setValue(1, features.getValence());
                 instance.setValue(2, features.getDanceability());
-                instance.setDataset(dataset); // Important: set the dataset for the instance
+                instance.setDataset(dataset); // Important: setează setul de date pentru instanță
                 dataset.add(instance);
             }
             
             System.out.println("MoodClassifier: Running k-means clustering...");
-            // Perform k-means clustering with 4 clusters (one for each mood)
+            // Efectueaza clustering k-means cu 4 clustere (unu pentru fiecare stare)
             SimpleKMeans kMeans = new SimpleKMeans();
-            kMeans.setNumClusters(Math.min(4, dataset.numInstances())); // Handle case with fewer than 4 songs
+            kMeans.setNumClusters(Math.min(4, dataset.numInstances())); // Gestionează cazul cu mai puțin de 4 melodii
             kMeans.buildClusterer(dataset);
             
             System.out.println("MoodClassifier: K-means clustering completed");
             System.out.println("MoodClassifier: Getting cluster assignments...");
             
-            // Get cluster assignments
+            // Obține atribuirile clusterelor
             int[] assignments = new int[audioFeaturesList.size()];
             for (int i = 0; i < dataset.numInstances(); i++) {
                 assignments[i] = kMeans.clusterInstance(dataset.instance(i));
             }
             
             System.out.println("MoodClassifier: Analyzing centroids...");
-            // Analyze cluster centroids to assign moods
+            // Analizează centroizii clusterelor pentru a atribui stări
             Instances centroids = kMeans.getClusterCentroids();
             double[][] centroidArray = new double[centroids.numInstances()][centroids.numAttributes()];
             for (int i = 0; i < centroids.numInstances(); i++) {
@@ -88,7 +88,7 @@ public class MoodClassifier {
             System.out.println("MoodClassifier: Grouping songs by mood...");
             Map<Integer, Mood> clusterToMood = assignMoodsToClusters(centroidArray);
             
-            // Group songs by mood
+            // Grupează melodiile după stare
             Map<Mood, List<String>> moodToSongs = new HashMap<>();
             for (Mood mood : Mood.values()) {
                 moodToSongs.put(mood, new ArrayList<>());
@@ -116,25 +116,25 @@ public class MoodClassifier {
     }
     
     private static Map<Integer, Mood> assignMoodsToClusters(double[][] centroids) {
-        // Analyze centroids to determine which cluster represents which mood
-        // centroids[cluster][attribute] where attributes are: [energy, valence, danceability]
+        // Analizeaza centroizii pentru a determina care cluster reprezintă care stare
+        // centroids[cluster][atribut] unde atributele sunt: [energie, valență, dansabilitate]
         
         Map<Integer, Mood> mapping = new HashMap<>();
         Mood[] moodArray = Mood.values();
         
-        // Simple approach: assign each cluster to the best matching mood
+        // Abordare simplă: atribuie fiecare cluster stării care se potrivește cel mai bine
         for (int cluster = 0; cluster < centroids.length; cluster++) {
             double energy = centroids[cluster][0];
             double valence = centroids[cluster][1];
             double danceability = centroids[cluster][2];
             
-            // Calculate scores for each mood
+            // Calculează scorurile pentru fiecare stare
             double energeticScore = energy * 0.6 + danceability * 0.4;
             double calmScore = (1 - energy) * 0.7 + (1 - danceability) * 0.3;
             double happyScore = valence * 0.7 + energy * 0.3;
             double melancholicScore = (1 - valence) * 0.8 + (1 - energy) * 0.2;
             
-            // Find which mood has the highest score
+            // Găsește care stare are scorul cel mai mare
             double maxScore = energeticScore;
             Mood bestMood = Mood.ENERGETIC;
             
